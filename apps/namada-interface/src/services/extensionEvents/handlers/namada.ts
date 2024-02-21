@@ -67,7 +67,8 @@ export const NamadaTxStartedHandler =
   };
 
 export const NamadaTxCompletedHandler =
-  (dispatch: Dispatch<unknown>) => async (event: CustomEventInit) => {
+  (dispatch: Dispatch<unknown>, refreshBalances: () => Promise<void>) =>
+  async (event: CustomEventInit) => {
     const { msgId, txType, success, payload } = event.detail;
     if (!success) {
       console.warn(`${txType} failed:`, payload);
@@ -80,4 +81,5 @@ export const NamadaTxCompletedHandler =
         error: payload || "",
       })
     );
+    refreshBalances();
   };

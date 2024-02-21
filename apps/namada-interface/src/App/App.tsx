@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { AnimatePresence } from "framer-motion";
 import { createBrowserHistory } from "history";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { PersistGate } from "redux-persist/integration/react";
 import { ThemeProvider } from "styled-components";
@@ -23,13 +23,7 @@ import { Outlet } from "react-router-dom";
 import { addAccounts, fetchBalances } from "slices/accounts";
 import { setChain } from "slices/chain";
 import { SettingsState } from "slices/settings";
-import {
-  persistor,
-  reduxStoreAtom,
-  store,
-  useAppDispatch,
-  useAppSelector,
-} from "store";
+import { persistor, store, useAppDispatch, useAppSelector } from "store";
 import {
   AppContainer,
   AppLoader,
@@ -64,10 +58,6 @@ export const AnimatedTransition = (props: {
     </MotionContainer>
   );
 };
-
-// TODO: can be moved to slices/notifications once redux is removed
-// Defining it there currently causes a unit test error related to redux-persist
-const toastsAtom = atom((get) => get(reduxStoreAtom).notifications.toasts);
 
 const useFetchMinimumGasPrice = (): void => {
   const chain = useAtomValue(chainAtom);
@@ -139,12 +129,6 @@ function App(): JSX.Element {
       }
     })();
   }, [currentExtensionAttachStatus]);
-
-  const toasts = useAtomValue(toastsAtom);
-  useEffect(() => {
-    // TODO: this could be more conservative about how often it fetches balances
-    refreshBalances();
-  }, [toasts]);
 
   return (
     <ThemeProvider theme={theme}>

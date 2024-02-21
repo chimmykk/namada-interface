@@ -19,7 +19,7 @@ import {
 } from "./handlers";
 
 import { useSetAtom } from "jotai";
-import { accountsAtom } from "slices/accounts";
+import { accountsAtom, balancesAtom } from "slices/accounts";
 import { chainAtom } from "slices/chain";
 
 export const ExtensionEventsContext = createContext({});
@@ -32,6 +32,7 @@ export const ExtensionEventsProvider: React.FC = (props): JSX.Element => {
 
   const refreshAccounts = useSetAtom(accountsAtom);
   const refreshChain = useSetAtom(chainAtom);
+  const refreshBalances = useSetAtom(balancesAtom);
 
   // Instantiate handlers:
   const namadaAccountChangedHandler = NamadaAccountChangedHandler(
@@ -45,7 +46,10 @@ export const ExtensionEventsProvider: React.FC = (props): JSX.Element => {
     refreshChain
   );
   const namadaTxStartedHandler = NamadaTxStartedHandler(dispatch);
-  const namadaTxCompletedHandler = NamadaTxCompletedHandler(dispatch);
+  const namadaTxCompletedHandler = NamadaTxCompletedHandler(
+    dispatch,
+    refreshBalances
+  );
   const namadaUpdatedBalancesHandler = NamadaUpdatedBalancesHandler(dispatch);
   const namadaUpdatedStakingHandler = NamadaUpdatedStakingHandler(dispatch);
   const namadaProposalsUpdatedHandler = NamadaProposalsUpdatedHandler(dispatch);
