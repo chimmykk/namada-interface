@@ -21,6 +21,10 @@ const minimumGasPriceAtom = (() => {
       const query = new Query(rpc);
 
       const promise = (async () => {
+        if (!nativeToken) {
+          throw new Error("Native token is undefined");
+        }
+
         const result = (await query.query_gas_costs()) as [string, string][];
         const nativeTokenCost = result.find(([token]) => token === nativeToken);
 

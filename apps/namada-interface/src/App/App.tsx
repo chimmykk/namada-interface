@@ -69,7 +69,18 @@ export const AnimatedTransition = (props: {
 // Defining it there currently causes a unit test error related to redux-persist
 const toastsAtom = atom((get) => get(reduxStoreAtom).notifications.toasts);
 
+const useFetchMinimumGasPrice = (): void => {
+  const chain = useAtomValue(chainAtom);
+  const refreshMinimumGasPrice = useSetAtom(minimumGasPriceAtom);
+
+  useEffect(() => {
+    refreshMinimumGasPrice();
+  }, [chain]);
+};
+
 function App(): JSX.Element {
+  useFetchMinimumGasPrice();
+
   const dispatch = useAppDispatch();
   const initialColorMode = loadColorMode();
   const [colorMode, setColorMode] = useState<ColorMode>(initialColorMode);
@@ -82,7 +93,6 @@ function App(): JSX.Element {
   const [chain, refreshChain] = useAtom(chainAtom);
   const refreshAccounts = useSetAtom(accountsAtom);
   const refreshBalances = useSetAtom(balancesAtom);
-  const refreshMinimumGasPrice = useSetAtom(minimumGasPriceAtom);
 
   const { connectedChains } = useAppSelector<SettingsState>(
     (state) => state.settings
@@ -113,7 +123,6 @@ function App(): JSX.Element {
       connectedChains.includes(chain.id)
     ) {
       fetchAccounts();
-      refreshMinimumGasPrice();
     }
   }, [chain]);
 
