@@ -1,11 +1,7 @@
-import {
-  BuiltTx,
-  Query as QueryWasm,
-  Sdk as SdkWasm,
-  TxType,
-} from "@namada/shared";
+import { Query as QueryWasm, Sdk as SdkWasm, TxType } from "@namada/shared";
 import { Message, TransferMsgValue, TxMsgValue } from "@namada/types";
 import { TransferProps, TxProps } from "types";
+import { EncodedTx, SignedTx } from "./types";
 
 export class Tx {
   constructor(
@@ -26,38 +22,36 @@ export class Tx {
     txProps: TxProps,
     transferProps: TransferProps,
     gasPayer: string
-  ): Promise<Uint8Array> {
+  ): Promise<EncodedTx> {
     const txMsg = new Message<TxMsgValue>();
     const transferMsg = new Message<TransferMsgValue>();
 
-    const encodedTx = txMsg.encode(new TxMsgValue(txProps));
-    const encodedTransfer = transferMsg.encode(
+    const encodedTxMsg = txMsg.encode(new TxMsgValue(txProps));
+    const encodedTransferMsg = transferMsg.encode(
       new TransferMsgValue(transferProps)
     );
     const tx = await this.sdk.build_tx(
       TxType.Transfer,
-      encodedTx,
-      encodedTransfer,
+      encodedTxMsg,
+      encodedTransferMsg,
       gasPayer
     );
 
-    return tx;
+    return new EncodedTx(encodedTxMsg, tx);
   }
 
   /**
    * Sign tx
    *
-   * @param {BuiltTx} tx
-   * @param {Uint8Array} txMsg
+   * @param {EncodedTx} encodedTx
    * @param {string} signingKey
    *
-   * @return {Uint8Array}
+   * @return {EncodedTx}
    */
-  async signTx(
-    tx: BuiltTx,
-    txMsg: Uint8Array,
-    signingKey: string
-  ): Promise<Uint8Array> {
-    return await this.sdk.sign_tx(tx, txMsg, signingKey);
+  async signTx(encodedTx: EncodedTx, signingKey: string): Promise<SignedTx> {
+    const { tx, txMsg } = encodedTx;
+    const signedTx = await this.sdk.sign_tx(tx, txMsg, signingKey);
+
+    return new SignedTx(txMsg, signedTx);
   }
 }

@@ -14,7 +14,7 @@ export class Sdk {
     protected readonly query: QueryWasm,
     protected readonly url: string,
     protected readonly nativeToken: string
-  ) {}
+  ) { }
 
   /**
    * Returns an initialized Sdk class
