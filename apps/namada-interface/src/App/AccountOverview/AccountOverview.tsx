@@ -7,9 +7,17 @@ import {
   useIntegrationConnection,
   useUntilIntegrationAttached,
 } from "@namada/integrations";
-import { Account, Chain, ExtensionKey, Extensions, TokenType, Tokens } from "@namada/types";
+import {
+  Account,
+  Chain,
+  ExtensionKey,
+  Extensions,
+  TokenType,
+  Tokens,
+} from "@namada/types";
 import { TopLevelRoute } from "App/types";
 import { AccountsState, addAccounts, fetchBalances } from "slices/accounts";
+import { chainAtom } from "slices/chain";
 import { setIsConnected } from "slices/settings";
 import { useAppDispatch, useAppSelector } from "store";
 import {
@@ -25,9 +33,9 @@ import {
 } from "./AccountOverview.components";
 import { DerivedAccounts } from "./DerivedAccounts";
 
+import BigNumber from "bignumber.js";
 import { useAtomValue, useSetAtom } from "jotai";
 import { accountsAtom, balancesAtom } from "slices/accounts";
-import BigNumber from "bignumber.js";
 
 //TODO: move to utils when we have one
 const isEmptyObject = (object: Record<string, unknown>): boolean => {
@@ -46,6 +54,7 @@ export const AccountOverview = (): JSX.Element => {
     metamask: false,
   });
 
+  const refreshChain = useSetAtom(chainAtom);
   const refreshAccounts = useSetAtom(accountsAtom);
   const refreshBalances = useSetAtom(balancesAtom);
 
@@ -65,13 +74,16 @@ export const AccountOverview = (): JSX.Element => {
 
   const balances = useAtomValue(balancesAtom);
   const totalNativeBalance = Object.values(balances).reduce((acc, balance) => {
-    return acc.plus(balance[chain.currency.symbol as TokenType] || BigNumber(0));
+    return acc.plus(
+      balance[chain.currency.symbol as TokenType] || BigNumber(0)
+    );
   }, BigNumber(0));
 
   const handleConnectExtension = async (): Promise<void> => {
     withConnection(
       async () => {
         // jotai
+        refreshChain();
         refreshAccounts();
         refreshBalances();
 
@@ -108,8 +120,12 @@ export const AccountOverview = (): JSX.Element => {
           <TotalContainer>
             {!isEmptyObject(derived[chain.id]) && (
               <TotalAmount>
-                <TotalAmountFiat>{Tokens[chain.currency.symbol as TokenType].symbol}</TotalAmountFiat>
-                <TotalAmountValue>{totalNativeBalance.toString()}</TotalAmountValue>
+                <TotalAmountFiat>
+                  {Tokens[chain.currency.symbol as TokenType].symbol}
+                </TotalAmountFiat>
+                <TotalAmountValue>
+                  {totalNativeBalance.toString()}
+                </TotalAmountValue>
               </TotalAmount>
             )}
           </TotalContainer>
